@@ -66,8 +66,11 @@ fn print_mismatches(result: HashMap<String, String>) {
 static HANDLE_RESULT: &'static Fn(HashMap<String, String>) = &handle_result;
 
 pub fn idempotent_check(filename: String) -> Result<(), HashMap<String, String>> {
+    let config_file_name = filename.replace(".rs", ".toml");
+    let mut def_config_file = fs::File::open(config_file_name)
+        .unwrap_or_else(|_| fs::File::open("default.toml").unwrap());
+
     let args = vec!["rustfmt".to_owned(), filename];
-    let mut def_config_file = fs::File::open("default.toml").unwrap();
     let mut def_config = String::new();
     def_config_file.read_to_string(&mut def_config).unwrap();
     // this thread is not used for concurrency, but rather to workaround the issue that the passed
